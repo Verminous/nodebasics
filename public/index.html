@@ -1,0 +1,71 @@
+<html lang="en">
+
+<head>
+    <title>Testing</title>
+    <link rel="stylesheet" type="text/css" href="/css/modals.css">
+</head>
+
+<body>
+
+    <form>
+        <input type="text" id="input" />
+        <button id="get">GET</button>
+        <button id="post">POST</button>
+    </form>
+
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <p id="message"></p>
+        </div>
+    </div>
+
+    <script>
+        const getBtn = document.getElementById("get");
+        const postBtn = document.getElementById("post");
+        const input = document.getElementById("input");
+        var modal = document.querySelector("#myModal");
+
+        const baseUrl = 'http://localhost:8383/';
+
+        getBtn.addEventListener("click", getInfo);
+        postBtn.addEventListener("click", postInfo);
+
+        async function getInfo(e) {
+            e.preventDefault();
+            const res = await fetch(baseUrl + "info/bruno?key=hello",
+                {
+                    method: 'GET'
+                });
+            console.log(res);
+            const data = await res.json();
+            input.value = data.info;
+            document.querySelector("#message").innerHTML = data.info;
+            modal.style.display = "block";
+        }
+
+        async function postInfo(e) {
+            e.preventDefault();
+            if (input.value == '') { return }; 
+            const res = await fetch(baseUrl,
+                {
+                    method: 'POST',
+                    headers: {
+                        "Content-Type": ' application/json'
+                    },
+                    body: JSON.stringify({
+                        parcel: input.value 
+                    })
+                });
+        }
+
+        document.querySelectorAll(".close")[0].onclick = function () {
+            modal.style.display = "none";
+        }
+    </script>
+
+
+
+</body>
+
+</html>
