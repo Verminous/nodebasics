@@ -1,26 +1,30 @@
+// server.js
 const express = require('express');
 const app = express();
-const port = 8383;
+const http = require('http');
+const server = http.createServer(app);
+const { Server } = require('socket.io');
+const io = new Server(server);
+const path = require('path');
 
-app.use(express.static('public'));
-app.use(express.json());
+// Serve static files from the public folder
+app.use(express.static(path.join(__dirname, 'public')));
 
-app.get('/info/:dynamic', (req, res) => {
-    const time = new Date().toUTCString();
-    const { dynamic } = req.params;
-    const { key } = req.query;
-    console.log(time, dynamic, key);
-    res.status(200).json({ info: "preset text 💜" })
+// Explicitly serve the index2.html file when the root path is requested
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index2.html'));
 });
 
-app.post('/', (req, res) => {
-    const { parcel } = req.body;
-    console.log(parcel);
-    if (!parcel) {
-        return res.status(400).send({ status: 'failed' });
-    }
-    res.status(200).send({ status: 'received' });
-})
+io.on('connection', (socket) => {
+  console.log('a user connected');
+  socket.on('disconnect', () => {
+    console.log('user disconnected');
+  });
 
-app.listen(port, () => console.log(`Server has started on port: ${port}`));
+  // Send a message to the client
+  socket.emit('message', 'Hello from the server! hehe');
+});
 
+server.listen(3009, () => {
+  console.log('listening on *:3009');
+});
